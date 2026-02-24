@@ -8,7 +8,7 @@ An AI voice assistant you can talk to — it can see your screen, control your b
 
 ### Option 1 — Just use it in your browser (no download needed)
 
-1. Go to the download page (ask whoever set this up for the link, it looks like `https://xxxxx.trycloudflare.com/download`)
+1. Go to **[https://mississippi-provider-expo-moms.trycloudflare.com/download](https://mississippi-provider-expo-moms.trycloudflare.com/download)**
 2. You'll see a voice widget right on the page — click the microphone button and start talking
 
 That's it. No install required.
@@ -23,7 +23,7 @@ The browser version is great for chatting, but if you want the AI to actually co
 
 #### Step 1 — Download it
 
-Go to the download page and click the button for your computer:
+Go to **[https://mississippi-provider-expo-moms.trycloudflare.com/download](https://mississippi-provider-expo-moms.trycloudflare.com/download)** and click the button for your computer:
 
 - **Windows** → click **Download for Windows**
 - **Mac** → click **Download for macOS**
@@ -50,7 +50,7 @@ Go to the download page and click the button for your computer:
 
 When you open the app for the first time, a **Settings** screen will appear asking for a **Relay URL**.
 
-- Go back to the download page
+- Go back to **[https://mississippi-provider-expo-moms.trycloudflare.com/download](https://mississippi-provider-expo-moms.trycloudflare.com/download)**
 - You'll see a box that says **"Your relay URL"** — click it to copy the address
 - Paste it into the Settings box in the app
 - Click **Save & Reconnect**
@@ -79,7 +79,7 @@ Once the desktop app is connected, you can ask it things like:
 ## Troubleshooting
 
 **The app says "No Tools Connected" or "Tools Disconnected"**
-The relay URL may have changed (it changes every time the server restarts). Go back to the download page, copy the new relay URL, open the app's settings (⚙ gear icon in the top right), paste it in, and click Save.
+The relay URL may have changed (it changes every time the server restarts). Go back to [the download page](https://mississippi-provider-expo-moms.trycloudflare.com/download), copy the new relay URL, open the app's settings (⚙ gear icon in the top right), paste it in, and click Save.
 
 **The download buttons say "building…"**
 The app is being compiled automatically — check back in about 15 minutes.
