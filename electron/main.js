@@ -11,7 +11,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
 const RELAY_URL = process.env.RELAY_URL || '';
-const AGENT_ID = process.env.AGENT_ID || '';
+const AGENT_ID = process.env.AGENT_ID || 'agent_3201kj2x8772fyxv3et1cptrbyed';
 
 let mainWindow = null;
 let ws = null;
