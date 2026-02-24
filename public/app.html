@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Kolb-Bot">
+<meta name="theme-color" content="#FAF9F7">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>Kolb-Bot</title>
+<style>
+:root{
+  --bg:#FAF9F7;--surf:#fff;--surf2:#F4F1FB;--surf3:#EDE8F7;
+  --border:#DDD8F0;--border2:#C0B8E8;
+  --pri:#6D28D9;--pri-d:#5B21B6;--pri-dim:rgba(109,40,217,.1);
+  --gold:#92400E;--gold-dim:rgba(146,64,14,.08);--gold-bd:rgba(146,64,14,.22);
+  --tx:#1C1033;--mu:#5B4E8A;--mu2:#9B90C2;
+  --ok:#15803D;--ok-dim:rgba(21,128,61,.1);
+  --er:#B91C1C;--er-dim:rgba(185,28,28,.08);
+  --r:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--tx);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top)}
+
+/* HEADER */
+.hdr{flex-shrink:0;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:var(--surf);border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+.hdr::before{content:'';position:absolute;inset:0;background:url('/kolb-bot-banner-design.png') center/cover;opacity:.05;pointer-events:none}
+.hdr-brand{display:flex;align-items:center;gap:9px;position:relative;z-index:1;flex-shrink:0}
+.hdr-brand img{width:36px;height:36px;border-radius:8px;object-fit:cover}
+.hdr-title{font-family:'Pirata One',serif;font-size:19px;color:var(--pri);letter-spacing:2px}
+.hdr-right{display:flex;align-items:center;gap:10px;position:relative;z-index:1;min-width:0}
+.sdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;transition:background .3s}
+.sdot.ok{background:var(--ok)}.sdot.off{background:var(--mu2)}
+.relay-pill{display:flex;align-items:center;gap:6px;background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:5px 10px;cursor:pointer;max-width:220px;min-width:0;transition:border-color .15s}
+.relay-pill:hover{border-color:var(--pri)}
+.relay-txt{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ok);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+.relay-lbl{font-size:12px;color:var(--mu);white-space:nowrap}
+@media(max-width:600px){.relay-pill,.relay-lbl{display:none}}
+
+/* LAYOUT */
+.layout{display:flex;flex:1;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:64px;flex-shrink:0;background:var(--surf);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:1px;overflow-y:auto}
+.nav-btn{width:50px;height:50px;border-radius:12px;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--mu2);transition:all .15s;font-size:9px;font-family:'Outfit',sans-serif;font-weight:600;letter-spacing:.5px;text-transform:uppercase;flex-shrink:0}
+.nav-btn:hover{background:var(--surf2);color:var(--mu)}
+.nav-btn.active{background:var(--pri-dim);color:var(--pri)}
+.sidebar-spacer{flex:1}
+.sb-foot{padding:8px 0 4px;display:flex;flex-direction:column;align-items:center}
+.sb-img{width:36px;height:36px;border-radius:9px;overflow:hidden;border:1.5px solid var(--border)}
+.sb-img img{width:100%;height:100%;object-fit:cover}
+
+/* MAIN */
+main{flex:1;overflow:hidden;position:relative}
+.panel{position:absolute;inset:0;display:none;flex-direction:column;overflow:hidden}
+.panel.active{display:flex}
+
+/* PANEL HEADER */
+.ph{flex-shrink:0;padding:10px 16px;background:var(--surf);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.ph-title{font-size:14px;font-weight:700;display:flex;align-items:center;gap:7px;flex:1;color:var(--tx)}
+.ph-title svg{color:var(--pri);flex-shrink:0}
+.ph-btn{padding:5px 12px;border-radius:7px;border:1px solid var(--border);background:var(--surf2);color:var(--mu);font-size:12px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .15s}
+.ph-btn:hover{border-color:var(--border2)}
+
+/* CHAT */
+.chat-topbar{flex-shrink:0;padding:8px 14px;background:var(--surf);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.model-pill{display:flex;align-items:center;gap:7px;background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:6px 11px;cursor:pointer;font-size:13px;color:var(--tx);transition:border-color .15s}
+.model-pill:hover{border-color:var(--pri)}
+.pdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.pdot.kb{background:var(--pri)}.pdot.anthropic{background:#D97706}.pdot.openai{background:#10A37F}
+.pdot.gemini{background:#4285F4}.pdot.ollama{background:#8B5CF6}.pdot.none{background:var(--mu2)}
+.chat-hist{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.chat-hist::-webkit-scrollbar{width:4px}
+.chat-hist::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.chat-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:40px}
+.chat-empty img{width:min(160px,45vw);animation:float 4s ease-in-out infinite;opacity:.9}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.empty-title{font-family:'Pirata One',serif;font-size:20px;color:var(--pri);letter-spacing:1px}
+.empty-sub{font-size:13px;color:var(--mu);text-align:center;max-width:230px;line-height:1.6}
+.msg{display:flex;flex-direction:column;gap:3px;animation:msgIn .2s ease}
+@keyframes msgIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.msg-user{align-items:flex-end}.msg-ai{align-items:flex-start}
+.bubble{max-width:82%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
+.msg-user .bubble{background:var(--pri);color:#fff;border-bottom-right-radius:4px}
+.msg-ai .bubble{background:var(--surf2);border:1px solid var(--border);color:var(--tx);border-bottom-left-radius:4px}
+.msg-ai .bubble code{font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--surf3);padding:1px 5px;border-radius:4px;color:var(--pri-d)}
+.msg-time{font-size:10px;color:var(--mu2);padding:0 4px}
+.typing-bbl{display:flex;align-items:center;gap:5px;padding:12px 16px}
+.tdot{width:6px;height:6px;border-radius:50%;background:var(--mu2);animation:td 1.2s ease-in-out infinite}
+.tdot:nth-child(2){animation-delay:.2s}.tdot:nth-child(3){animation-delay:.4s}
+@keyframes td{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
+.chat-bar{flex-shrink:0;padding:10px 14px;background:var(--surf);border-top:1px solid var(--border);display:flex;align-items:flex-end;gap:8px}
+.chat-ta{flex:1;background:var(--surf2);border:1px solid var(--border);border-radius:10px;padding:10px 13px;font-size:14px;font-family:'Outfit',sans-serif;color:var(--tx);resize:none;min-height:42px;max-height:120px;outline:none;transition:border-color .15s;line-height:1.5}
+.chat-ta::placeholder{color:var(--mu2)}
+.chat-ta:focus{border-color:var(--pri)}
+.send-btn{flex-shrink:0;width:42px;height:42px;border-radius:10px;border:none;background:var(--pri);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s,transform .1s}
+.send-btn:hover{background:var(--pri-d)}.send-btn:active{transform:scale(.95)}.send-btn:disabled{background:var(--border);cursor:default}
+
+/* CALL */
+.call-inner{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;overflow-y:auto;position:relative}
+.call-bg{position:absolute;inset:0;background:url('/kolb-bot-tech-support.png') center 15%/contain no-repeat;opacity:.04;pointer-events:none}
+.call-mascot{width:min(180px,40vw);position:relative;z-index:1;filter:drop-shadow(0 8px 20px rgba(109,40,217,.15))}
+.call-title{font-family:'Pirata One',serif;font-size:22px;color:var(--pri);letter-spacing:1.5px;position:relative;z-index:1}
+.call-sub{font-size:13px;color:var(--mu);position:relative;z-index:1}
+.call-card{background:var(--surf);border:1px solid var(--border);border-radius:16px;padding:20px;width:100%;max-width:320px;box-shadow:0 4px 24px rgba(109,40,217,.08);position:relative;z-index:1}
+elevenlabs-convai{width:100%!important}
+.share-row{display:flex;gap:10px;width:100%;max-width:320px;position:relative;z-index:1}
+.share-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:11px 8px;border-radius:10px;border:1px solid var(--border);background:var(--surf);color:var(--mu);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;font-family:'Outfit',sans-serif}
+.share-btn.on{border-color:var(--ok);background:var(--ok-dim);color:var(--ok)}
+.cam-wrap{position:relative;width:100%;max-width:320px;border-radius:12px;overflow:hidden;background:var(--surf3);display:none;aspect-ratio:4/3;z-index:1}
+.cam-wrap.active{display:block}
+.cam-wrap video{width:100%;height:100%;object-fit:cover;display:block}
+.live-badge{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.9);backdrop-filter:blur(4px);border-radius:5px;padding:3px 9px;font-size:10px;font-weight:700;color:var(--ok);display:flex;align-items:center;gap:5px}
+.live-badge::before{content:'';width:5px;height:5px;background:var(--ok);border-radius:50%;animation:blink 1.2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* GRID VIEWS */
+.grid-body{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.grid-body::-webkit-scrollbar{width:4px}
+.grid-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.gcard{background:var(--surf);border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;transition:border-color .15s,box-shadow .15s}
+.gcard:hover{border-color:var(--border2);box-shadow:0 2px 12px rgba(109,40,217,.07)}
+.gcard-name{font-size:14px;font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:7px}
+.gcard-sub{font-size:12px;color:var(--mu);line-height:1.5}
+.gcard-foot{margin-top:10px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px}
+.chip-ok{background:var(--ok-dim);color:var(--ok)}.chip-er{background:var(--er-dim);color:var(--er)}
+.chip-mu{background:var(--surf3);color:var(--mu)}.chip-pri{background:var(--pri-dim);color:var(--pri)}
+.dot-ok{width:7px;height:7px;border-radius:50%;background:var(--ok);display:inline-block;flex-shrink:0}
+.dot-er{width:7px;height:7px;border-radius:50%;background:var(--er);display:inline-block;flex-shrink:0}
+.dot-mu{width:7px;height:7px;border-radius:50%;background:var(--mu2);display:inline-block;flex-shrink:0}
+.del-btn{padding:4px 10px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--mu2);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;font-family:'Outfit',sans-serif}
+.del-btn:hover{border-color:var(--er);color:var(--er);background:var(--er-dim)}
+.loading-row{display:flex;align-items:center;gap:10px;color:var(--mu);font-size:13px;padding:20px}
+.spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--pri);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-state{text-align:center;padding:40px 20px;color:var(--mu);font-size:14px}
+
+/* LOGS */
+.logs-body{flex:1;overflow-y:auto;padding:12px 16px;font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.7;background:var(--surf2)}
+.log-line{white-space:pre-wrap;word-break:break-all;padding:1px 0;color:var(--tx)}
+.log-err{color:var(--er)!important}.log-warn{color:var(--gold)!important}.log-ok{color:var(--ok)!important}
+
+/* TOOLS */
+.tools-body{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:16px}
+.tools-body::-webkit-scrollbar{width:4px}
+.tools-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.cat-head{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--mu2);display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.cat-head::after{content:'';flex:1;height:1px;background:var(--border)}
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+.tool-card{background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:12px 13px;transition:border-color .15s}
+.tool-card:hover{border-color:var(--border2)}
+.tool-name{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--pri);margin-bottom:4px}
+.tool-desc{font-size:12px;color:var(--mu);line-height:1.5}
+.no-relay{background:var(--er-dim);border:1px solid rgba(185,28,28,.2);border-radius:10px;padding:12px 15px;display:flex;align-items:center;gap:9px;font-size:13px;color:var(--er);margin-bottom:4px}
+
+/* CONFIG */
+.cfg-body{flex:1;overflow-y:auto;padding:16px}
+.cfg-body::-webkit-scrollbar{width:4px}
+.cfg-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.prov-intro{display:flex;align-items:flex-start;gap:13px;background:var(--gold-dim);border:1px solid var(--gold-bd);border-radius:12px;padding:13px 15px;margin-bottom:18px}
+.prov-intro img{width:48px;flex-shrink:0;border-radius:8px}
+.prov-intro h3{font-size:14px;font-weight:700;color:var(--gold);margin-bottom:3px}
+.prov-intro p{font-size:12px;color:var(--mu);line-height:1.5}
+.prov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:18px}
+.pcard{background:var(--surf);border:2px solid var(--border);border-radius:13px;padding:15px;cursor:pointer;transition:all .15s;position:relative}
+.pcard:hover{border-color:var(--border2)}
+.pcard.sel{border-color:var(--pri);box-shadow:0 0 0 3px var(--pri-dim)}
+.pcard-logo{font-size:24px;margin-bottom:7px}
+.pcard-name{font-size:14px;font-weight:700;margin-bottom:2px}
+.pcard-desc{font-size:12px;color:var(--mu);line-height:1.5}
+.sel-chip{position:absolute;top:10px;right:10px;background:var(--pri);color:#fff;font-size:9px;font-weight:700;padding:3px 7px;border-radius:5px;letter-spacing:.5px}
+.ccard{background:var(--surf);border:1px solid var(--border);border-radius:13px;padding:16px;margin-bottom:14px}
+.ccard h3{font-size:14px;font-weight:700;margin-bottom:13px;display:flex;align-items:center;gap:8px}
+.fl{font-size:11px;color:var(--mu);font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+.fi{width:100%;background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;font-family:'JetBrains Mono',monospace;color:var(--tx);outline:none;transition:border-color .15s;margin-bottom:11px}
+.fi::placeholder{color:var(--mu2);font-family:'Outfit',sans-serif}
+.fi:focus{border-color:var(--pri)}
+.fsel{width:100%;background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;font-family:'Outfit',sans-serif;color:var(--tx);outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;margin-bottom:11px;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%235B4E8A' stroke-width='1.5' stroke-linecap='round' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:10px}
+.fsel:focus{border-color:var(--pri)}.fsel option{background:#fff}
+.fta{width:100%;background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:12px;font-family:'Outfit',sans-serif;color:var(--tx);outline:none;resize:vertical;min-height:70px;line-height:1.55;margin-bottom:11px}
+.fta:focus{border-color:var(--pri)}
+.save-btn{width:100%;padding:11px;border-radius:9px;border:none;background:var(--pri);color:#fff;font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;transition:background .15s}
+.save-btn:hover{background:var(--pri-d)}.save-btn.saved{background:var(--ok)}
+
+/* BOTTOM NAV */
+.bnav{display:none;flex-shrink:0;background:var(--surf);border-top:1px solid var(--border);padding-bottom:env(safe-area-inset-bottom);overflow-x:auto}
+.bnav::-webkit-scrollbar{display:none}
+.bnav-inner{display:flex;min-width:max-content;padding:0 2px}
+.bnav-btn{flex-shrink:0;width:62px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:8px 4px;border:none;background:transparent;cursor:pointer;font-size:9px;font-family:'Outfit',sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--mu2);transition:color .15s}
+.bnav-btn.active{color:var(--pri)}
+
+@media(max-width:640px){.sidebar{display:none}.bnav{display:block}}
+@media(min-width:641px){.bnav{display:none!important}}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-brand">
+    <img src="/apple-touch-icon.png" alt="K">
+    <span class="hdr-title">KOLB-BOT</span>
+  </div>
+  <div class="hdr-right">
+    <span class="relay-lbl" id="relayLbl">Checking...</span>
+    <div class="sdot off" id="relayDot"></div>
+    <div class="relay-pill" onclick="copyRelay()" id="relayPill" title="Copy relay URL">
+      <span class="relay-txt" id="relayTxt">...</span>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="color:var(--mu2);flex-shrink:0"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main>
+
+    <!-- CHAT -->
+    <div class="panel active" id="tab-chat">
+      <div class="chat-topbar">
+        <div class="model-pill" onclick="switchTab('config')" title="Configure provider">
+          <div class="pdot none" id="chatProvDot"></div>
+          <span id="chatModelLbl">No provider — configure</span>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" style="color:var(--mu2)"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg>
+        </div>
+        <button onclick="clearChat()" title="Clear chat" style="background:none;border:none;cursor:pointer;color:var(--mu2);padding:6px;border-radius:7px;display:flex;align-items:center;transition:color .15s" onmouseover="this.style.color='var(--er)'" onmouseout="this.style.color='var(--mu2)'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+        </button>
+      </div>
+      <div class="chat-hist" id="chatHist">
+        <div class="chat-empty" id="chatEmpty">
+          <img src="/kolb-bot-notes.png" alt="Kolb-Bot">
+          <div class="empty-title">Ready to Parley!</div>
+          <div class="empty-sub">Configure a provider in Config, then start chatting.</div>
+        </div>
+      </div>
+      <div class="chat-bar">
+        <textarea class="chat-ta" id="chatInput" placeholder="Message Kolb-Bot…" rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendChat()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- CALL -->
+    <div class="panel" id="tab-call">
+      <div class="call-inner">
+        <div class="call-bg"></div>
+        <img src="/kolb-bot-tech-support.png" class="call-mascot" alt="Kolb-Bot">
+        <div class="call-title">Voice Command</div>
+        <div class="call-sub">Talk to Kolb-Bot — controls your PC hands-free</div>
+        <div class="call-card">
+          <elevenlabs-convai agent-id="agent_3201kj2x8772fyxv3et1cptrbyed"></elevenlabs-convai>
+        </div>
+        <div class="cam-wrap" id="camWrap">
+          <video id="camVideo" autoplay playsinline muted></video>
+          <div class="live-badge">LIVE</div>
+        </div>
+        <div class="share-row">
+          <button class="share-btn" id="camBtn" onclick="toggleCamera()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+            Share Camera
+          </button>
+          <button class="share-btn" id="screenBtn" onclick="toggleScreen()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14z"/></svg>
+            Share Screen
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHANNELS -->
+    <div class="panel" id="tab-channels">
+      <div class="ph">
+        <div class="ph-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+          Channels
+        </div>
+        <button class="ph-btn" onclick="loadChannels()">Refresh</button>
+      </div>
+      <div class="grid-body" id="channelsBody">
+        <div class="loading-row"><div class="spinner"></div>Loading channels…</div>
+      </div>
+    </div>
+
+    <!-- MODELS -->
+    <div class="panel" id="tab-models">
+      <div class="ph">
+        <div class="ph-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 9V7c0-1.1-.9-2-2-2h-3c0-1.66-1.34-3-3-3S9 3.34 9 5H6c-1.1 0-2 .9-2 2v2c-1.66 0-3 1.34-3 3s1.34 3 3 3v4c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4c1.66 0 3-1.34 3-3s-1.34-3-3-3zm-2 10H6v-9h12v9zm-9-6h2v2H9v-2zm4 0h2v2h-2v-2z"/></svg>
+          Models
+        </div>
+        <button class="ph-btn" onclick="loadModels()">Refresh</button>
+      </div>
+      <div class="grid-body" id="modelsBody">
+        <div class="loading-row"><div class="spinner"></div>Loading models…</div>
+      </div>
+    </div>
+
+    <!-- AGENTS -->
+    <div class="panel" id="tab-agents">
+      <div class="ph">
+        <div class="ph-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+          Agents
+        </div>
+        <button class="ph-btn" onclick="loadAgents()">Refresh</button>
+      </div>
+      <div class="grid-body" id="agentsBody">
+        <div class="loading-row"><div class="spinner"></div>Loading agents…</div>
+      </div>
+    </div>
+
+    <!-- SESSIONS -->
+    <div class="panel" id="tab-sessions">
+      <div class="ph">
+        <div class="ph-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+          Sessions
+        </div>
+        <button class="ph-btn" onclick="loadSessions()">Refresh</button>
+      </div>
+      <div class="grid-body" id="sessionsBody">
+        <div class="loading-row"><div class="spinner"></div>Loading sessions…</div>
+      </div>
+    </div>
+
+    <!-- LOGS -->
+    <div class="panel" id="tab-logs">
+      <div class="ph">
+        <div class="ph-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h15v14zM7 7h2v2H7zm4 0h6v2h-6zm-4 4h2v2H7zm4 0h6v2h-6zm-4 4h2v2H7zm4 0h6v2h-6z"/></svg>
+          Gateway Logs
+        </div>
+        <button class="ph-btn" onclick="loadLogs()">Refresh</button>
+      </div>
+      <div class="logs-body" id="logsBody">
+        <div class="loading-row"><div class="spinner"></div>Loading logs…</div>
+      </div>
+    </div>
+
+    <!-- TOOLS -->
+    <div class="panel" id="tab-tools">
+      <div class="ph">
+        <div class="ph-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg>
+          MCP Tools
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--mu)">
+            <div class="sdot off" id="toolsRelayDot"></div>
+            <span id="toolsRelayLbl">Not connected</span>
+          </div>
+          <span style="font-size:12px;color:var(--mu2)" id="toolsCount">24 tools</span>
+        </div>
+      </div>
+      <div class="tools-body" id="toolsBody">
+        <div id="noRelayBanner" class="no-relay" style="display:none">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+          Desktop app not connected. Download and run it to enable PC control.
+        </div>
+        <div id="toolsGroups"></div>
+      </div>
+    </div>
+
+    <!-- CONFIG -->
+    <div class="panel" id="tab-config">
+      <div class="cfg-body">
+        <div class="prov-intro">
+          <img src="/kolb-bot-on-pc.png" alt="KB">
+          <div>
+            <h3>AI Providers</h3>
+            <p>Pick a provider and model for the Chat tab. API keys are stored only in your browser's localStorage.</p>
+          </div>
+        </div>
+        <div class="prov-grid">
+          <div class="pcard" id="pcard-kb" onclick="selProv('kb')">
+            <div class="pcard-logo">🤖</div>
+            <div class="pcard-name">Kolb-Bot Gateway</div>
+            <div class="pcard-desc">Route chat through the local Kolb-Bot daemon</div>
+          </div>
+          <div class="pcard" id="pcard-anthropic" onclick="selProv('anthropic')">
+            <div class="pcard-logo">🟠</div>
+            <div class="pcard-name">Anthropic</div>
+            <div class="pcard-desc">Claude Opus, Sonnet &amp; Haiku</div>
+          </div>
+          <div class="pcard" id="pcard-openai" onclick="selProv('openai')">
+            <div class="pcard-logo">🟢</div>
+            <div class="pcard-name">OpenAI</div>
+            <div class="pcard-desc">GPT-4o, GPT-4o mini</div>
+          </div>
+          <div class="pcard" id="pcard-gemini" onclick="selProv('gemini')">
+            <div class="pcard-logo">🔵</div>
+            <div class="pcard-name">Google Gemini</div>
+            <div class="pcard-desc">Gemini 2.0 Flash, 1.5 Pro</div>
+          </div>
+          <div class="pcard" id="pcard-ollama" onclick="selProv('ollama')">
+            <div class="pcard-logo">🟣</div>
+            <div class="pcard-name">Ollama (Local)</div>
+            <div class="pcard-desc">Run models locally</div>
+          </div>
+        </div>
+        <div class="ccard">
+          <h3 id="cfgTitle">
+            <span class="pdot none" id="cfgDot" style="width:9px;height:9px"></span>
+            Select a provider above
+          </h3>
+          <div id="apiKeyRow">
+            <div class="fl">API Key</div>
+            <input type="password" class="fi" id="apiKeyIn" placeholder="Paste your API key…">
+          </div>
+          <div class="fl">Model</div>
+          <select class="fsel" id="modelSel"></select>
+          <div class="fl" style="margin-top:2px">System Prompt</div>
+          <textarea class="fta" id="sysPromptIn">You are Kolb-Bot, a highly capable AI assistant with a bold pirate personality. You're sharp, confident, and get things done.</textarea>
+          <button class="save-btn" id="saveBtn" onclick="saveCfg2()">Save Configuration</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<nav class="bnav" id="bnav"></nav>
+
+<script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
+<script>
+// ── Tab definitions ──────────────────────────────────────────────────────────
+const TABS = [
+  { id:'chat',     lbl:'Chat',     ic:'M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z',           fn: updateChatTopbar },
+  { id:'call',     lbl:'Call',     ic:'M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z' },
+  { id:'channels', lbl:'Channels', ic:'M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z', fn: loadChannels },
+  { id:'models',   lbl:'Models',   ic:'M20 9V7c0-1.1-.9-2-2-2h-3c0-1.66-1.34-3-3-3S9 3.34 9 5H6c-1.1 0-2 .9-2 2v2c-1.66 0-3 1.34-3 3s1.34 3 3 3v4c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4c1.66 0 3-1.34 3-3s-1.34-3-3-3zm-2 10H6v-9h12v9zm-9-6h2v2H9v-2zm4 0h2v2h-2v-2z', fn: loadModels },
+  { id:'agents',   lbl:'Agents',   ic:'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z',                  fn: loadAgents },
+  { id:'sessions', lbl:'Sessions', ic:'M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z', fn: loadSessions },
+  { id:'logs',     lbl:'Logs',     ic:'M20 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h15v14zM7 7h2v2H7zm4 0h6v2h-6zm-4 4h2v2H7zm4 0h6v2h-6zm-4 4h2v2H7zm4 0h6v2h-6z', fn: loadLogs },
+  { id:'tools',    lbl:'Tools',    ic:'M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z',  fn: loadTools },
+  { id:'config',   lbl:'Config',   ic:'M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z', fn: loadProviderUI },
+];
+
+function buildNav() {
+  const sb = document.getElementById('sidebar');
+  const bni = document.createElement('div'); bni.className = 'bnav-inner';
+  TABS.forEach(t => {
+    const svg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="' + t.ic + '"/></svg>';
+    const sbb = document.createElement('button');
+    sbb.className = 'nav-btn' + (t.id === 'chat' ? ' active' : '');
+    sbb.dataset.tab = t.id; sbb.onclick = () => switchTab(t.id);
+    sbb.innerHTML = svg + t.lbl; sb.appendChild(sbb);
+    const bnb = document.createElement('button');
+    bnb.className = 'bnav-btn' + (t.id === 'chat' ? ' active' : '');
+    bnb.dataset.tab = t.id; bnb.onclick = () => switchTab(t.id);
+    bnb.innerHTML = svg + t.lbl; bni.appendChild(bnb);
+  });
+  const sp = document.createElement('div'); sp.className = 'sidebar-spacer'; sb.appendChild(sp);
+  const ft = document.createElement('div'); ft.className = 'sb-foot';
+  ft.innerHTML = '<div class="sb-img"><img src="/kolb-bot-on-pc.png" alt="KB"></div>';
+  sb.appendChild(ft);
+  document.getElementById('bnav').appendChild(bni);
+}
+buildNav();
+
+// ── Config (relay URL) ────────────────────────────────────────────────────────
+let relayUrl = '';
+async function initCfg() {
+  const d = await fetch('/api/config').then(r => r.json()).catch(() => ({ relayUrl: '' }));
+  relayUrl = d.relayUrl || '';
+  document.getElementById('relayTxt').textContent = relayUrl;
+}
+initCfg();
+
+// ── Tab switching ─────────────────────────────────────────────────────────────
+function switchTab(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn,.bnav-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === id));
+  document.getElementById('tab-' + id).classList.add('active');
+  const t = TABS.find(x => x.id === id);
+  if (t && t.fn) t.fn();
+}
+
+// ── Status polling ────────────────────────────────────────────────────────────
+function pollStatus() {
+  fetch('/api/tools').then(r => r.json()).then(d => {
+    const ok = d.relayConnected;
+    document.getElementById('relayDot').className = 'sdot ' + (ok ? 'ok' : 'off');
+    document.getElementById('relayLbl').textContent = ok ? 'Desktop connected' : 'Desktop offline';
+    const td = document.getElementById('toolsRelayDot'); if (td) td.className = 'sdot ' + (ok ? 'ok' : 'off');
+    const tl = document.getElementById('toolsRelayLbl'); if (tl) tl.textContent = ok ? 'Desktop connected' : 'Not connected';
+    const nb = document.getElementById('noRelayBanner'); if (nb) nb.style.display = ok ? 'none' : 'flex';
+  }).catch(() => {});
+}
+setInterval(pollStatus, 5000); pollStatus();
+
+// ── Copy relay URL ────────────────────────────────────────────────────────────
+function copyRelay() {
+  if (!relayUrl) return;
+  navigator.clipboard.writeText(relayUrl).then(() => {
+    const p = document.getElementById('relayPill');
+    p.style.borderColor = 'var(--ok)';
+    setTimeout(() => { p.style.borderColor = ''; }, 2000);
+  });
+}
+
+// ── Chat ─────────────────────────────────────────────────────────────────────
+const PROV_MODELS = {
+  kb: ['kolb-bot'],
+  anthropic: ['claude-opus-4-6', 'claude-sonnet-4-6', 'claude-haiku-4-5-20251001'],
+  openai: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo'],
+  gemini: ['gemini-2.0-flash', 'gemini-1.5-pro', 'gemini-1.5-flash'],
+  ollama: ['llama3.2', 'llama3.1', 'mistral', 'codellama', 'phi3'],
+};
+let msgs = [], sending = false;
+function loadCfg() { try { return JSON.parse(localStorage.getItem('kb_cfg') || '{}'); } catch { return {}; } }
+
+function updateChatTopbar() {
+  const c = loadCfg();
+  document.getElementById('chatProvDot').className = 'pdot ' + (c.provider || 'none');
+  document.getElementById('chatModelLbl').textContent = c.provider ? (c.model || c.provider) : 'No provider — configure';
+}
+function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
+function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); } }
+function tstr() { return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
+
+function appendMsg(role, text) {
+  const h = document.getElementById('chatHist');
+  const em = document.getElementById('chatEmpty'); if (em) em.remove();
+  const d = document.createElement('div');
+  d.className = 'msg msg-' + (role === 'user' ? 'user' : 'ai');
+  const s = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/`([^`]+)`/g, '<code>$1</code>');
+  d.innerHTML = '<div class="bubble">' + s + '</div><div class="msg-time">' + tstr() + '</div>';
+  h.appendChild(d); h.scrollTop = h.scrollHeight;
+}
+function showTyping() {
+  const h = document.getElementById('chatHist');
+  const em = document.getElementById('chatEmpty'); if (em) em.remove();
+  const d = document.createElement('div'); d.className = 'msg msg-ai'; d.id = 'typing';
+  d.innerHTML = '<div class="bubble typing-bbl"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div>';
+  h.appendChild(d); h.scrollTop = h.scrollHeight;
+}
+function rmTyping() { const t = document.getElementById('typing'); if (t) t.remove(); }
+
+async function sendChat() {
+  if (sending) return;
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim(); if (!text) return;
+  const c = loadCfg(); if (!c.provider) { switchTab('config'); return; }
+  input.value = ''; input.style.height = 'auto';
+  sending = true; document.getElementById('sendBtn').disabled = true;
+  msgs.push({ role: 'user', content: text }); appendMsg('user', text);
+  const body = c.systemPrompt ? [{ role: 'system', content: c.systemPrompt }, ...msgs] : [...msgs];
+  showTyping();
+  try {
+    const url = c.provider === 'kb' ? '/api/kb/chat' : '/api/chat';
+    const payload = c.provider === 'kb'
+      ? { messages: body, model: c.model }
+      : { messages: body, provider: c.provider, model: c.model, apiKey: c.apiKey };
+    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const data = await res.json(); rmTyping();
+    if (data.error) { appendMsg('ai', 'Error: ' + data.error); }
+    else { msgs.push({ role: 'assistant', content: data.content }); appendMsg('ai', data.content); }
+  } catch (e) { rmTyping(); appendMsg('ai', 'Error: ' + e.message); }
+  sending = false; document.getElementById('sendBtn').disabled = false; input.focus();
+}
+function clearChat() {
+  msgs = [];
+  document.getElementById('chatHist').innerHTML = '<div class="chat-empty" id="chatEmpty"><img src="/kolb-bot-notes.png" alt="KB"><div class="empty-title">Ready to Parley!</div><div class="empty-sub">Configure a provider in Config, then start chatting.</div></div>';
+}
+
+// ── Tools ─────────────────────────────────────────────────────────────────────
+const CAT_ICONS = { Vision: '👁', Browser: '🌐', Files: '📁', Shell: '⚡', Clipboard: '📋', System: '🖥' };
+function loadTools() {
+  fetch('/api/tools').then(r => r.json()).then(data => {
+    const grps = {};
+    data.tools.forEach(t => { (grps[t.cat] = grps[t.cat] || []).push(t); });
+    const c = document.getElementById('toolsGroups'); c.innerHTML = '';
+    Object.entries(grps).forEach(([cat, tools]) => {
+      const d = document.createElement('div');
+      d.innerHTML = '<div class="cat-head">' + (CAT_ICONS[cat] || '') + ' ' + cat + '</div><div class="tools-grid">' +
+        tools.map(t => '<div class="tool-card"><div class="tool-name">' + t.name + '</div><div class="tool-desc">' + t.desc + '</div></div>').join('') + '</div>';
+      c.appendChild(d);
+    });
+    document.getElementById('toolsCount').textContent = data.tools.length + ' tools';
+  }).catch(() => {});
+}
+
+// ── Channels ──────────────────────────────────────────────────────────────────
+function loadChannels() {
+  const el = document.getElementById('channelsBody');
+  el.innerHTML = '<div class="loading-row"><div class="spinner"></div>Loading…</div>';
+  fetch('/api/kb/channels').then(r => r.json()).then(d => {
+    const ch = d.channels || d.data || d;
+    if (!ch || typeof ch !== 'object' || !Object.keys(ch).length) {
+      el.innerHTML = '<div class="empty-state">No channels configured, or gateway not connected.</div>'; return;
+    }
+    el.innerHTML = '<div class="grid">' + Object.keys(ch).map(k => {
+      const c = ch[k] || {};
+      const run = c.running, conn = c.connected, en = c.enabled !== false;
+      const dotCls = (run || conn) ? 'dot-ok' : en ? 'dot-mu' : 'dot-er';
+      const chipTxt = run ? 'running' : conn ? 'connected' : en ? 'enabled' : 'disabled';
+      const chipCls = (run || conn) ? 'chip-ok' : en ? 'chip-mu' : 'chip-er';
+      return '<div class="gcard"><div class="gcard-name"><span class="' + dotCls + '"></span>' + k + '</div>' +
+        (c.type ? '<div class="gcard-sub">' + c.type + '</div>' : '') +
+        '<div class="gcard-foot"><span class="chip ' + chipCls + '">' + chipTxt + '</span></div></div>';
+    }).join('') + '</div>';
+  }).catch(() => { el.innerHTML = '<div class="empty-state">Failed to load channels. Is the gateway running?</div>'; });
+}
+
+// ── Models ────────────────────────────────────────────────────────────────────
+function loadModels() {
+  const el = document.getElementById('modelsBody');
+  el.innerHTML = '<div class="loading-row"><div class="spinner"></div>Loading…</div>';
+  fetch('/api/kb/models').then(r => r.json()).then(d => {
+    const models = d.models || d.data || [];
+    if (!models.length) { el.innerHTML = '<div class="empty-state">No models found. Configure providers in the gateway.</div>'; return; }
+    el.innerHTML = '<div class="grid">' + models.map(m => {
+      const name = typeof m === 'string' ? m : (m.id || m.name || JSON.stringify(m));
+      const prov = typeof m === 'object' ? (m.provider || m.owned_by || '') : '';
+      return '<div class="gcard"><div class="gcard-name">' + name + '</div>' +
+        (prov ? '<div class="gcard-sub">' + prov + '</div>' : '') +
+        '<div class="gcard-foot"><span class="chip chip-pri">model</span></div></div>';
+    }).join('') + '</div>';
+  }).catch(() => { el.innerHTML = '<div class="empty-state">Failed to load models. Is the gateway running?</div>'; });
+}
+
+// ── Agents ────────────────────────────────────────────────────────────────────
+function loadAgents() {
+  const el = document.getElementById('agentsBody');
+  el.innerHTML = '<div class="loading-row"><div class="spinner"></div>Loading…</div>';
+  fetch('/api/kb/agents').then(r => r.json()).then(d => {
+    const agents = d.agents || d.data || [];
+    if (!agents.length) { el.innerHTML = '<div class="empty-state">No agents configured.</div>'; return; }
+    el.innerHTML = '<div class="grid">' + agents.map(a => {
+      const name = a.name || a.id || 'Unknown';
+      const model = a.model || '';
+      const identity = a.identity || '';
+      return '<div class="gcard"><div class="gcard-name">' + name + '</div>' +
+        (model ? '<div class="gcard-sub">Model: ' + model + '</div>' : '') +
+        (identity ? '<div class="gcard-sub" style="margin-top:4px;font-size:11px">' + identity.slice(0, 80) + (identity.length > 80 ? '…' : '') + '</div>' : '') +
+        '<div class="gcard-foot"><span class="chip chip-pri">agent</span></div></div>';
+    }).join('') + '</div>';
+  }).catch(() => { el.innerHTML = '<div class="empty-state">Failed to load agents. Is the gateway running?</div>'; });
+}
+
+// ── Sessions ──────────────────────────────────────────────────────────────────
+function loadSessions() {
+  const el = document.getElementById('sessionsBody');
+  el.innerHTML = '<div class="loading-row"><div class="spinner"></div>Loading…</div>';
+  fetch('/api/kb/sessions').then(r => r.json()).then(d => {
+    const sessions = d.sessions || d.data || [];
+    if (!sessions.length) { el.innerHTML = '<div class="empty-state">No active sessions.</div>'; return; }
+    el.innerHTML = sessions.map(s => {
+      const key = s.key || s.id || '?';
+      const channel = s.channel || '';
+      const agent = s.agent || '';
+      const ts = s.updatedAt || s.createdAt || s.ts;
+      const age = ts ? new Date(ts).toLocaleString() : '';
+      return '<div class="gcard" style="display:flex;justify-content:space-between;align-items:flex-start">' +
+        '<div><div class="gcard-name" style="font-size:12px;font-family:JetBrains Mono,monospace">' + key + '</div>' +
+        '<div class="gcard-foot" style="margin-top:6px">' +
+        (channel ? '<span class="chip chip-mu">' + channel + '</span>' : '') +
+        (agent ? '<span class="chip chip-pri">' + agent + '</span>' : '') +
+        (age ? '<span style="font-size:11px;color:var(--mu2)">' + age + '</span>' : '') +
+        '</div></div>' +
+        '<button class="del-btn" onclick="delSession(\'' + key.replace(/'/g, "\\'") + '\')">Delete</button></div>';
+    }).join('');
+  }).catch(() => { el.innerHTML = '<div class="empty-state">Failed to load sessions. Is the gateway running?</div>'; });
+}
+function delSession(key) {
+  if (!confirm('Delete session "' + key + '"?')) return;
+  fetch('/api/kb/sessions/' + encodeURIComponent(key), { method: 'DELETE' })
+    .then(() => loadSessions()).catch(() => alert('Failed to delete session'));
+}
+
+// ── Logs ──────────────────────────────────────────────────────────────────────
+function loadLogs() {
+  const el = document.getElementById('logsBody');
+  el.innerHTML = '<div class="loading-row"><div class="spinner"></div>Loading…</div>';
+  fetch('/api/kb/logs').then(r => r.json()).then(d => {
+    const lines = d.lines || d.entries || d.data || [];
+    if (!lines.length) { el.innerHTML = '<div style="padding:20px;color:var(--mu);font-family:inherit">No log entries.</div>'; return; }
+    el.innerHTML = lines.map(l => {
+      const txt = typeof l === 'string' ? l : (l.message || l.msg || JSON.stringify(l));
+      const cls = /error|err/i.test(txt) ? 'log-err' : /warn/i.test(txt) ? 'log-warn' : /ok|success|connected/i.test(txt) ? 'log-ok' : '';
+      const safe = txt.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return '<div class="log-line' + (cls ? ' ' + cls : '') + '">' + safe + '</div>';
+    }).join('');
+    el.scrollTop = el.scrollHeight;
+  }).catch(() => { el.innerHTML = '<div style="padding:20px;color:var(--mu);font-family:inherit">Failed to load logs. Is the gateway running?</div>'; });
+}
+
+// ── Config/Providers ──────────────────────────────────────────────────────────
+let activeProv = null;
+function selProv(p) {
+  activeProv = p;
+  document.querySelectorAll('.pcard').forEach(c => c.classList.remove('sel'));
+  document.querySelectorAll('.sel-chip').forEach(c => c.remove());
+  const card = document.getElementById('pcard-' + p);
+  if (card) { card.classList.add('sel'); const ch = document.createElement('div'); ch.className = 'sel-chip'; ch.textContent = 'ACTIVE'; card.appendChild(ch); }
+  const cfg = loadCfg();
+  const needKey = p !== 'ollama' && p !== 'kb';
+  document.getElementById('apiKeyRow').style.display = needKey ? 'block' : 'none';
+  document.getElementById('apiKeyIn').value = (cfg.provider === p ? cfg.apiKey : '') || '';
+  const titles = { kb: 'Kolb-Bot Gateway', anthropic: 'Anthropic Claude', openai: 'OpenAI GPT', gemini: 'Google Gemini', ollama: 'Ollama Local' };
+  document.getElementById('cfgDot').className = 'pdot ' + p;
+  document.getElementById('cfgTitle').innerHTML = '<span class="pdot ' + p + '" style="width:9px;height:9px"></span> ' + (titles[p] || p);
+  const sel = document.getElementById('modelSel');
+  sel.innerHTML = (PROV_MODELS[p] || []).map(m => '<option value="' + m + '">' + m + '</option>').join('');
+  if (cfg.provider === p && cfg.model) sel.value = cfg.model;
+  if (cfg.systemPrompt) document.getElementById('sysPromptIn').value = cfg.systemPrompt;
+}
+function loadProviderUI() {
+  const c = loadCfg(); if (c.provider) selProv(c.provider);
+}
+function saveCfg2() {
+  if (!activeProv) return;
+  localStorage.setItem('kb_cfg', JSON.stringify({
+    provider: activeProv,
+    apiKey: document.getElementById('apiKeyIn').value.trim(),
+    model: document.getElementById('modelSel').value,
+    systemPrompt: document.getElementById('sysPromptIn').value,
+  }));
+  updateChatTopbar();
+  const btn = document.getElementById('saveBtn');
+  btn.textContent = 'Saved!'; btn.classList.add('saved');
+  setTimeout(() => { btn.textContent = 'Save Configuration'; btn.classList.remove('saved'); }, 2000);
+}
+
+// ── Camera / Screen ───────────────────────────────────────────────────────────
+let camStr = null, camIv = null, scrStr = null, scrIv = null;
+const cv = document.createElement('canvas'), cx = cv.getContext('2d');
+const sv = document.createElement('video');
+sv.autoplay = true; sv.muted = true; sv.playsInline = true;
+sv.style.cssText = 'position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;top:0;left:0';
+document.body.appendChild(sv);
+function postFrm(url, d) { fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ frame: d }) }).catch(() => {}); }
+function sSBtn(id, on, lbl, path) { const b = document.getElementById(id); b.className = 'share-btn' + (on ? ' on' : ''); b.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="' + path + '"/></svg> ' + lbl; }
+const CP = 'M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z';
+const SP = 'M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14z';
+async function toggleCamera() { camStr ? stopCam() : await startCam(); }
+async function startCam() {
+  try {
+    camStr = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 480 } }, audio: false });
+    const v = document.getElementById('camVideo'); v.srcObject = camStr;
+    v.onloadedmetadata = () => { camIv = setInterval(() => { if (!v.videoWidth) return; cv.width = v.videoWidth; cv.height = v.videoHeight; cx.drawImage(v, 0, 0); postFrm('/camera-frame', cv.toDataURL('image/jpeg', .7).split(',')[1]); }, 1500); };
+    document.getElementById('camWrap').classList.add('active');
+    sSBtn('camBtn', true, 'Stop Camera', CP);
+  } catch (e) { alert('Camera denied.'); }
+}
+function stopCam() { if (camStr) { camStr.getTracks().forEach(t => t.stop()); camStr = null; } clearInterval(camIv); document.getElementById('camWrap').classList.remove('active'); sSBtn('camBtn', false, 'Share Camera', CP); }
+async function toggleScreen() { scrStr ? stopScr() : await startScr(); }
+async function startScr() {
+  if (!navigator.mediaDevices?.getDisplayMedia) { alert('Screen sharing not supported.'); return; }
+  try {
+    scrStr = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 2 }, audio: false });
+    sv.srcObject = scrStr; scrStr.getVideoTracks()[0].onended = stopScr;
+    sv.onloadedmetadata = () => { scrIv = setInterval(() => { if (!sv.videoWidth) return; cv.width = sv.videoWidth; cv.height = sv.videoHeight; cx.drawImage(sv, 0, 0); postFrm('/screen-frame', cv.toDataURL('image/jpeg', .7).split(',')[1]); }, 1500); };
+    sSBtn('screenBtn', true, 'Stop Screen', SP);
+  } catch (e) { if (e.name !== 'NotAllowedError') alert('Screen share failed: ' + e.message); }
+}
+function stopScr() { if (scrStr) { scrStr.getTracks().forEach(t => t.stop()); scrStr = null; } clearInterval(scrIv); sSBtn('screenBtn', false, 'Share Screen', SP); }
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+updateChatTopbar();
+</script>
+</body>
+</html>

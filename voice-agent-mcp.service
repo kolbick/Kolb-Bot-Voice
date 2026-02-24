@@ -1,0 +1,17 @@
+[Unit]
+Description=Voice Agent MCP Server
+After=network.target
+
+[Service]
+Type=simple
+User=kolb-bot
+WorkingDirectory=/home/kolb-bot/voice-agent-mcp
+ExecStart=/usr/bin/bash /home/kolb-bot/voice-agent-mcp/start.sh
+Restart=on-failure
+RestartSec=5
+Environment=PORT=8787
+Environment=HOME=/home/kolb-bot
+Environment=DISPLAY=:0
+
+[Install]
+WantedBy=multi-user.target
