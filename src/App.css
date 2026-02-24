@@ -1,0 +1,270 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #0a0a0f;
+  color: #cdd6f4;
+  font-family: system-ui, -apple-system, sans-serif;
+  height: 100vh;
+  overflow: hidden;
+  user-select: none;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Header */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  border-bottom: 1px solid #1e1e2e;
+  flex-shrink: 0;
+  -webkit-app-region: drag;
+}
+
+header * {
+  -webkit-app-region: no-drag;
+}
+
+h1 {
+  font-size: 17px;
+  font-weight: 700;
+  color: #cba6f7;
+  letter-spacing: 0.5px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.relay-dot {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.relay-dot.connected { color: #a6e3a1; }
+.relay-dot.connecting { color: #f9e2af; }
+.relay-dot.disconnected { color: #6c7086; }
+
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6c7086;
+  font-size: 15px;
+  padding: 4px;
+  border-radius: 4px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+.icon-btn:hover {
+  color: #cdd6f4;
+}
+
+/* Main */
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 18px;
+  gap: 16px;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.warning {
+  background: #2a1a1a;
+  border: 1px solid #f38ba880;
+  color: #f38ba8;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  text-align: center;
+  width: 100%;
+  line-height: 1.5;
+  flex-shrink: 0;
+}
+
+/* Talk button */
+.talk-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.talk-btn {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  transition: transform 0.15s, background 0.15s;
+  outline: none;
+}
+
+.talk-btn:not(.active) {
+  background: #7f5af0;
+  color: #fff;
+  box-shadow: 0 4px 20px #7f5af040;
+}
+
+.talk-btn:not(.active):hover {
+  background: #9a73ff;
+  transform: scale(1.04);
+}
+
+.talk-btn:not(.active):active {
+  transform: scale(0.97);
+}
+
+.talk-btn.active {
+  background: #f38ba8;
+  color: #fff;
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(243, 139, 168, 0.35); }
+  50%       { box-shadow: 0 0 0 18px rgba(243, 139, 168, 0); }
+}
+
+.agent-status {
+  font-size: 13px;
+  color: #6c7086;
+  min-height: 18px;
+  text-align: center;
+}
+
+/* Transcript */
+.transcript {
+  flex: 1;
+  overflow-y: auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  padding-bottom: 4px;
+}
+
+.transcript::-webkit-scrollbar {
+  width: 4px;
+}
+
+.transcript::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.transcript::-webkit-scrollbar-thumb {
+  background: #313244;
+  border-radius: 2px;
+}
+
+.empty-transcript {
+  color: #45475a;
+  font-size: 13px;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.message {
+  padding: 9px 13px;
+  border-radius: 12px;
+  max-width: 88%;
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.message.user {
+  background: #1e2a3a;
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+}
+
+.message.ai {
+  background: #1e1e2e;
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+
+.source {
+  display: block;
+  font-size: 10px;
+  color: #585b70;
+  margin-bottom: 3px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.text {
+  color: #cdd6f4;
+}
+
+/* Settings */
+.settings-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #a6adc8;
+  width: 100%;
+}
+
+.settings-hint {
+  font-size: 11px;
+  font-weight: 400;
+  color: #585b70;
+}
+
+.settings-input {
+  width: 100%;
+  background: #1e1e2e;
+  border: 1px solid #313244;
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #cdd6f4;
+  font-size: 13px;
+  font-family: monospace;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.settings-input:focus {
+  border-color: #7f5af0;
+}
+
+.save-btn {
+  width: 100%;
+  padding: 11px;
+  background: #7f5af0;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.save-btn:hover {
+  background: #9a73ff;
+}

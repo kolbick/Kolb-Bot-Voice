@@ -1,0 +1,89 @@
+{
+  "name": "voice-agent-electron",
+  "version": "1.0.0",
+  "description": "Voice Agent Desktop App — runs MCP tools locally and connects to ElevenLabs",
+  "main": "electron/main.js",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "concurrently \"vite build --watch\" \"sleep 3 && electron .\"",
+    "start": "electron .",
+    "install-browsers": "npx playwright install chromium",
+    "package": "npm run build && npx electron-builder",
+    "package:linux": "npm run build && npx electron-builder --linux",
+    "package:win": "npm run build && npx electron-builder --win",
+    "package:mac": "npm run build && npx electron-builder --mac"
+  },
+  "build": {
+    "appId": "com.kolbbot.voice",
+    "productName": "Kolb-Bot Voice",
+    "asar": true,
+    "asarUnpack": [
+      "node_modules/screenshot-desktop/**",
+      "node_modules/clipboardy/**"
+    ],
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "extraMetadata": {
+      "main": "electron/main.js"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "category": "Utility"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false
+    },
+    "mac": {
+      "target": [{ "target": "dmg", "arch": ["x64", "arm64"] }],
+      "category": "public.app-category.utilities"
+    },
+    "dmg": {
+      "writeUpdateInfo": false
+    },
+    "directories": {
+      "output": "release"
+    },
+    "publish": {
+      "provider": "github"
+    }
+  },
+  "dependencies": {
+    "@elevenlabs/react": "^0.12.0",
+    "clipboardy": "^4.0.0",
+    "dotenv": "^16.0.0",
+    "playwright": "^1.49.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "screenshot-desktop": "^1.15.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.0",
+    "concurrently": "^9.0.0",
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8",
+    "vite": "^6.0.0"
+  }
+}
